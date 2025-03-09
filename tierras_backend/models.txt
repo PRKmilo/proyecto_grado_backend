@@ -1,0 +1,108 @@
+# This is an auto-generated Django model module.
+# You'll have to do the following manually to clean this up:
+#   * Rearrange models' order
+#   * Make sure each model has one field with primary_key=True
+#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
+#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
+# Feel free to rename the models, but don't rename db_table values or field names.
+from django.db import models
+
+
+class Escribano(models.Model):
+    escribano_id = models.AutoField(primary_key=True)
+    tribunal = models.CharField(max_length=255, blank=True, null=True)
+    numero_registro = models.CharField(max_length=255, blank=True, null=True)
+    notaria_asignada = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'escribano'
+
+
+class Escritura(models.Model):
+    numero_escritura = models.CharField(primary_key=True, max_length=255)
+    proceso_escritura = models.ForeignKey('Proceso', models.DO_NOTHING, db_column='proceso_escritura')
+    nombre_notaria = models.CharField(max_length=255, blank=True, null=True)
+    fecha_otorgamiento = models.DateField(blank=True, null=True)
+    fecha_inicio = models.DateField(blank=True, null=True)
+    municipio = models.CharField(max_length=255, blank=True, null=True)
+    descripcion_movimiento = models.CharField(max_length=255, blank=True, null=True)
+    direccion_predio = models.CharField(max_length=255, blank=True, null=True)
+    direccion_smart_contract = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'escritura'
+
+
+class Juez(models.Model):
+    juez_id = models.AutoField(primary_key=True)
+    tribunal = models.CharField(max_length=255, blank=True, null=True)
+    nivel_jurisdiccional = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'juez'
+
+
+class Notario(models.Model):
+    notario_id = models.AutoField(primary_key=True)
+    numero_licencia = models.CharField(max_length=255, blank=True, null=True)
+    oficina_registro = models.CharField(max_length=255)
+    notaria_asignada = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'notario'
+
+
+class Proceso(models.Model):
+    proceso_id = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey('Usuario', models.DO_NOTHING, blank=True, null=True)
+    seriado_proceso = models.CharField(max_length=255, blank=True, null=True)
+    estado = models.CharField(max_length=255, blank=True, null=True)
+    fecha_inicio = models.DateField(blank=True, null=True)
+    fecha_actualizacion = models.DateField(blank=True, null=True)
+    limite_tiempo = models.IntegerField(blank=True, null=True)
+    fecha_limite = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'proceso'
+
+
+class Rol(models.Model):
+    rol_id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=255, blank=True, null=True)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'rol'
+
+
+class Usuario(models.Model):
+    cedula = models.CharField(primary_key=True, max_length=255)
+    hash_password = models.CharField(max_length=255, blank=True, null=True)
+    username = models.CharField(max_length=255, blank=True, null=True)
+    nombre = models.CharField(max_length=255, blank=True, null=True)
+    primer_apellido = models.CharField(max_length=255, blank=True, null=True)
+    segundo_apellido = models.CharField(max_length=255, blank=True, null=True)
+    fecha_expedicion_cedula = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'usuario'
+
+
+class UsuarioRol(models.Model):
+    usuario_rol_id = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, models.DO_NOTHING)
+    rol = models.ForeignKey(Rol, models.DO_NOTHING)
+    juez = models.ForeignKey(Juez, models.DO_NOTHING, blank=True, null=True)
+    escribano = models.ForeignKey(Escribano, models.DO_NOTHING, blank=True, null=True)
+    notario = models.ForeignKey(Notario, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'usuario_rol'
