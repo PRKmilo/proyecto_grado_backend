@@ -10,6 +10,9 @@ from .serializers import UsuarioSerializer, MFASerializer
 from .models import UsuarioRol
 from .authentication import AuthenticationService
 from rest_framework_simplejwt.tokens import RefreshToken
+from escrituras.networkService.smart_contract import SmartContract
+from escrituras.networkService.credentials import Credentials
+from escrituras.models.escritura import Escritura
 # Create your views here.
 
 class UsuarioListCreateView(APIView):
@@ -103,10 +106,14 @@ class LoginView(APIView):
         if MFADevice.objects.filter(user=user, is_active=True).exists():
             return Response({"mfa_required": True}, status=status.HTTP_200_OK)
         
+        usuario_rol = UsuarioRol.objects.filter(usuario_id=user.cedula).values_list('rol_id', flat=True).first()
+
+        print(usuario_rol)
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+            'usuario_rol': str(usuario_rol)
         }) 
         
 
@@ -193,3 +200,78 @@ class JWTProtectedView(APIView):
     
     def get(self, request):
         return Response({"message": f"Hola, {request.user.nombre}. Tienes acceso al endpoint protegido."}, status=status.HTTP_200_OK)
+
+
+class CuentaDesbloqueo(APIView):
+    def post(self, request, escritura_id):
+        print("ingresando a la funion de desbloqueo")
+        numero_rol = request.data.get("rol_id")
+        password = request.data.get("password")
+        cedula = request.data.get("user_id")
+        print(cedula)
+        direccion_smart_contract= Escritura.objects.filter(numero_escritura=escritura_id).first().direccion_smart_contract
+         
+        if not cedula or not password:
+            return Response({"error": "Cédula y contraseña requeridas"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = AuthenticationService.autenticar_usuario(cedula, password)
+
+        if user is None:
+            return Response({"error": "Credenciales inválidas"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        contract = SmartContract(direccion_smart_contract)
+        conteo = contract.contar_validaciones()
+        
+
+
+        diccionario_roles = {
+            4: "escribanoKey",
+            5: "juezprKey",
+            6: "notarioKey",
+            7: "beneficiarioKey"
+        }
+        palabra = diccionario_roles.get(int(numero_rol), "desconocido") 
+        
+        print("este es el conteo ")
+        print(type(numero_rol))
+        print("este es el conteo")
+        if conteo >=3 and int(numero_rol) == 5:
+            palabra = "juezsdKey"
+
+        credenciales = Credentials()
+        key = credenciales.get_key(palabra)
+        print("esta es la llave")
+        print(key)
+        print("print este es termino para mostrar la contraseña")
+        return Response({"credential": key, "resultado_rol": palabra}) 
+
+         
+
+               
+
+
+class RolValidacion(APIView):
+    def post(self, request, escritura_id):
+        numero_rol = request.data.get("role_id")
+        direccion_smart_contract= Escritura.objects.filter(numero_escritura=escritura_id).first().direccion_smart_contract
+        contract = SmartContract(direccion_smart_contract)
+        conteo = contract.contar_validaciones()
+        diccionario_roles = {
+            4: "escribano",
+            5: "juezpr",
+            6: "notario",
+            7: "beneficiario"
+        }
+        palabra = diccionario_roles.get(int(numero_rol), "desconocido") 
+        
+        if conteo >=3 and int(numero_rol) == 5:
+            palabra = "juezsd"
+        print("esta es la palabra")
+        print(palabra)
+        print("esta es la palabra")
+        return Response({"resultado_rol": palabra}) 
+
+         
+
+               
+

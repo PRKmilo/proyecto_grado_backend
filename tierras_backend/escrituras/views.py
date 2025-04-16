@@ -10,7 +10,7 @@ from .cloudinaryService.cloudinary_service  import CloudinaryService
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import RolesVerificadores
 from rest_framework.permissions import IsAuthenticated
-
+from escrituras.networkService.smart_contract import SmartContract
 class EscrituraListCreateView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     """
@@ -82,4 +82,23 @@ class EscrituraUpdateView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class EscrituraConsultaEtapa(APIView):
+    def get(self, request, escritura_id):
+    
+        print("este es -------------------------------------------------------------------------- 1")
+        direccion_smart_contract = Escritura.objects.filter(numero_escritura= escritura_id).first().direccion_smart_contract
+        
+        print("este es -------------------------------------------------------------------------- 1")
+        print("este es -------------------------------------------------------------------------- 2")
+        print(direccion_smart_contract)
+        contract = SmartContract(direccion_smart_contract)
+        
+        print("este es -------------------------------------------------------------------------- 3")
+        validaciones = contract.contar_validaciones()
+        print(type(validaciones))
+        print("esta son las validaciones")
+        print(validaciones)
+        print("esta son las validaciones")
+        return Response(int(validaciones))
 

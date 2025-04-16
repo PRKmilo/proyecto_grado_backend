@@ -70,3 +70,8 @@ class SmartContract:
                                 'nonce': middelwareNetworkService.nonce(credentials.get_role("beneficiario")),})
 
         middelwareNetworkService.transaction(self.instance(), transaction, credentials.get_key("beneficiarioKey")) 
+
+    def contar_validaciones(self):
+        value = self.instance().functions.contarAprobaciones().call()
+        return value 
+
