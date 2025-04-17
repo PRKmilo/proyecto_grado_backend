@@ -12,6 +12,7 @@ class Escritura(models.Model):
     direccion_predio = models.CharField(max_length=255, blank=True, null=True)
     direccion_smart_contract = models.CharField(max_length=255, blank=True, null=True)
     direccion_temporal_data = models.CharField(max_length=255, blank=True, null=True)
+    direccion_temporal_data2 = models.CharField(max_length=255, blank=True, null=True)
     cedula_catastral = models.CharField(max_length=255, blank=True, null=True) 
 
     class Meta:

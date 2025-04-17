@@ -7,6 +7,7 @@ from rest_framework import status
 from .models import Escritura
 from .serializers import EscrituraSerializer
 from .cloudinaryService.cloudinary_service  import CloudinaryService
+from firebase.firebaseService import FirebaseService
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import RolesVerificadores
 from rest_framework.permissions import IsAuthenticated
@@ -27,24 +28,23 @@ class EscrituraListCreateView(APIView):
         #permission_classes = [IsAuthenticated]
         #serializer = EscrituraSerializer(data=request.data)
         #request.data['direccion_smart_contract'] = middelwareNetworkService.deploy_contrac()
-        print("requets.data ---------------------------------------------")
-        print(request.data)
-        print("request data final ----------------------------------------------")
-        print(request.FILES)
+        archivo_txt = request.FILES.get('archivo_txt')
         archivo_pdf = request.FILES.get('archivo_pdf')
-        print("inicio bandera XXXXXXXXXXXXXXX")
-        print(archivo_pdf)
-        print("termino de bandera XXXXXXXXXXXXXXXXXXXXXXXx")
-        if archivo_pdf:
+        print(request.data)
+        firebase = FirebaseService()
+        url2 = ''
+        if archivo_txt:
             try:
-                url = CloudinaryService.subir_archivo(archivo_pdf, carpeta="escrituras")
-                print(f"este es el url XXXXXXXXXXXXXXXX{url}")
+                url = firebase.subir_archivo(archivo_txt)
+                if archivo_pdf:
+                    url2 = firebase.subir_archivo(archivo_pdf)
             except Exception as e:
                 return Response({"error": f"Error al subir el archivo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             url_pdf = None   
 
-        request.data['direccion_temporal_data'] = url 
+        request.data['direccion_temporal_data'] = url
+        request.data['direccion_temporal_data'] = url2
         request.data['direccion_smart_contract'] = middelwareNetworkService.deploy_contrac()
         serializer = EscrituraSerializer(data=request.data)
         if serializer.is_valid():
