@@ -62,4 +62,13 @@ class ProcesoEscritura(APIView):
         serializer= EscrituraSerializer(lista_escrituras, many=True)
         return Response(serializer.data , status=status.HTTP_200_OK)
  
+class ProcesoBeneficiario(APIView):
 
+    def get(self, request, user_id):
+        try:
+            proceso = Proceso.objects.filter(usuario_id=user_id)
+            print(proceso[0])
+            serializer = ProcesoSerializer(proceso, many=True)
+            return Response(serializer.data)
+        except Proceso.DoesNotExist:
+            return Response({'error': 'Proceso no encontrado'}, status=status.HTTP_404_NOT_FOUND)
