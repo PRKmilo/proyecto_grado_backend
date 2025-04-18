@@ -6,6 +6,8 @@ from rest_framework import status
 from .models import Proceso
 from .serializers import ProcesoSerializer
 from rest_framework.permissions import IsAuthenticated
+from escrituras.models import Escritura
+from escrituras.serializers import  EscrituraSerializer
 
 class ProcesoListCreateView(APIView):
     """
@@ -53,3 +55,20 @@ class ProcesoUpdateView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ProcesoEscritura(APIView):
+
+    def get(self, request, proceso_id):
+        lista_escrituras = Escritura.objects.filter(proceso_escritura= proceso_id)
+        serializer= EscrituraSerializer(lista_escrituras, many=True)
+        return Response(serializer.data , status=status.HTTP_200_OK)
+ 
+class ProcesoBeneficiario(APIView):
+
+    def get(self, request, user_id):
+        try:
+            proceso = Proceso.objects.filter(usuario_id=user_id)
+            print(proceso[0])
+            serializer = ProcesoSerializer(proceso, many=True)
+            return Response(serializer.data)
+        except Proceso.DoesNotExist:
+            return Response({'error': 'Proceso no encontrado'}, status=status.HTTP_404_NOT_FOUND)

@@ -8,6 +8,8 @@ LoginView,
 ActivarMFAView,
 VerificarMFAView,
 JWTProtectedView,
+CuentaDesbloqueo,
+RolValidacion
 )
 
 urlpatterns = [
@@ -19,7 +21,10 @@ urlpatterns = [
     path("mfa/activar/", ActivarMFAView.as_view(), name="activar-mfa"),
     path("mfa/verificar/", VerificarMFAView.as_view(), name="verificar-mfa"),
 
+    path("desbloquear-cuenta/<str:escritura_id>/", CuentaDesbloqueo.as_view(), name="cuenta-desbloqueo"),
+    path("rol-validacion/<str:escritura_id>/", RolValidacion.as_view(), name="rol-validacion"),
+
     # 📌 Endpoint protegido con JWT
-    path("protegido/", JWTProtectedView.as_view(), name="jwt-protected"),
+    path("protegido/<str:escritura_id>/", JWTProtectedView.as_view(), name="jwt-protected"),
 
 ]

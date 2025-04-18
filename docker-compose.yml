@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password  # Cambia esto a un password seguro
+      MYSQL_DATABASE: example_db          # Nombre de la base de datos inicial
+      MYSQL_USER: user                    # Usuario adicional
+      MYSQL_PASSWORD: user_password       # Contraseña del usuario
+    ports:
+      - "3307:3306"                       # Exponiendo MySQL en el puerto 3306
+    volumes:
+      - mysql_data:/var/lib/mysql         # Persistencia de datos
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql                     # Host de MySQL (nombre del servicio)
+      PMA_PORT: 3306                      # Puerto de MySQL
+      PMA_USER: root                      # Usuario para acceder a MySQL
+      PMA_PASSWORD: root_password         # Contraseña de MySQL
+    ports:
+      - "8080:80"                         # Exponiendo phpMyAdmin en el puerto 8080
+
+volumes:
+  mysql_data:
+

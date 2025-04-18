@@ -46,8 +46,22 @@ INSTALLED_APPS = [
     'escrituras',
     'validaciones',
     'correcciones',
+    'corsheaders',
     'notificaciones',
+    'channels',
 ]
+
+
+ASGI_APPLICATION = 'tierras_backend.asgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  # tu Redis local
+        },
+    },
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,8 +70,14 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 ROOT_URLCONF = 'tierras_backend.urls'
 
@@ -108,6 +128,8 @@ DATABASES = {
         'PORT': '3307'
     }
 }
+
+
 
 
 # Password validation

@@ -3,12 +3,17 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from notificaciones.models import Notificacion
+from correcciones.models import Correcion
+from escrituras.models.roles_verificadores import RolesVerificadores
 from escrituras.networkService.smart_contract import SmartContract
 from escrituras.networkService.credentials import Credentials
 from escrituras.models.escritura import Escritura
 from escrituras.models.roles_verificadores import  RolesVerificadores
 from escrituras.ipfsService.ipfsService import IPFSManager
+from notificaciones.notify_user import notify_user
 import cloudinary.uploader
+ 
 from io import BytesIO
 import requests
 # Create your views here.
@@ -23,8 +28,17 @@ class ValidarSmartContract(APIView):
         token = request.data.get("token")
         id_user = request.data.get("id_user")
         id_escritura = request.data.get("numero_escritura")
+        mensaje_c = request.data.get("mensaje_correccion")
+        posicion1 = request.data.get("posicion_inicial")
+        posicion2 = request.data.get("posicion_final")
+        print("esta es posicion1")
+        print(posicion1)
+        print("esta es posicion2")
+        print(posicion2)
+        print("mensaje")
+        print(mensaje_c)
         credentials = Credentials()
-        if not all([direccion_smart_contract, respuesta_rol, rol_validacion, token]):
+        if not all([direccion_smart_contract, rol_validacion, token]):
             return Response(
                 {"mensaje": "Faltan datos requeridos"}, 
                 status=status.HTTP_400_BAD_REQUEST
@@ -50,6 +64,11 @@ class ValidarSmartContract(APIView):
                 {"mensaje": "Su token es incorrecto o está desactualizado"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+        id_escribano = RolesVerificadores.objects.filter(id_escritura_id=id_escritura).first().id_escribano 
+        if not respuesta_rol:
+            notificacion_registro = Notificacion.objects.create(id_escritura_id=id_escritura,user_sender=id_user, user_receiver=id_escribano,mensaje=f"Tiene que corregir el documento con id #{id_escritura}")
+            notify_user(notificacion_registro)
+            correccion = Correcion.objects.create(id_notificacion=notificacion_registro,line_number=posicion1,start_position=posicion1,end_position=posicion2,is_resolved=False, comment=mensaje_c, descripcion=mensaje_c)
 
         if not contract.contract_exist:
             return Response(
@@ -134,7 +153,8 @@ class ValidarBeneficiario(APIView):
                     movimiento = escritura.descripcion_movimiento
                     municipio = escritura.municipio
                     fecha_otorgamiento = escritura.fecha_otorgamiento
-                    
+                    notificacion_id = Notificacion.objects.filter(id_escritura_id=escritura.numero_escritura).first
+                    Correcion.objects.filter(id_notificacion=notificacion_id.id_notificacion).update(is_resolved=True)                      
                     contract.validacion_beneficiario(respuesta,numero_escritura,nombre_notaria,fecha_otorgamiento,id_actor_otorga,id_favorecido,cedula_catastral, municipio,movimiento,CID)
                     return Response(
                        {"mensaje": "Se llego hasta la ultima instancia de la transaccion"},
