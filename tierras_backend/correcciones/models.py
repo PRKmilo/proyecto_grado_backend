@@ -15,3 +15,6 @@ class Correcion(models.Model):
     class Meta:
         managed = True
         db_table= 'correccion'
+
+    def __str__(self):
+        return f'Corrección {self.id_correcion}'

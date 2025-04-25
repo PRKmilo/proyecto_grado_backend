@@ -132,37 +132,37 @@ class ActivarMFAView(APIView):
         qr_uri = mfa_device.generate_totp_uri()
         return Response({"qr_uri": qr_uri}, status=status.HTTP_200_OK)
 
-"""
-class VerificarMFAView(APIView):
-    #permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        codigo = request.data.get("codigo")
-        print("este es el codigo")
-        print(codigo)
-        print("este es el usuario")
-        print(request.user)
-        if not codigo:
-            return Response({"error": "Código MFA requerido"}, status=status.HTTP_400_BAD_REQUEST)
-        print("linea antes de 404 ")
-        mfa_device = get_object_or_404(MFADevice, user=request.user, is_active=True)
-        print("linea desues de 404")
-        if not mfa_device.verify_code(codigo):
+# class VerificarMFAView(APIView):
+#    #permission_classes = [IsAuthenticated]
+
+ #   def post(self, request):
+ #       codigo = request.data.get("codigo")
+ #       print("este es el codigo")
+ #       print(codigo)
+ #       print("este es el usuario")
+ #       print(request.user)
+ #       if not codigo:
+ #           return Response({"error": "Código MFA requerido"}, status=status.HTTP_400_BAD_REQUEST)
+ #       print("linea antes de 404 ")
+ #       mfa_device = get_object_or_404(MFADevice, user=request.user, is_active=True)
+ #       print("linea desues de 404")
+ #       if not mfa_device.verify_code(codigo):
 
 
-            return Response({"error": "Código MFA incorrecto"}, status=status.HTTP_400_BAD_REQUEST)
+ #           return Response({"error": "Código MFA incorrecto"}, status=status.HTTP_400_BAD_REQUEST)
 
-        refresh = RefreshToken.for_user(request.user)
-        access_token = str(refresh.access_token)
+ #       refresh = RefreshToken.for_user(request.user)
+ #       access_token = str(refresh.access_token)
 
-        return Response({
-            "refresh": str(refresh),
-            "access": access_token
-        }, status=status.HTTP_200_OK)       
+#        return Response({
+#            "refresh": str(refresh),
+#            "access": access_token
+#        }, status=status.HTTP_200_OK)       
 
         #token = AuthenticationService.generar_jwt(request.user)
         #return Response({"token": token}, status=status.HTTP_200_OK)
-"""
+
 class VerificarMFAView(APIView):
     def post(self, request):
         codigo = request.data.get("codigo")
@@ -178,6 +178,7 @@ class VerificarMFAView(APIView):
         user = get_object_or_404(Usuario, email=email)
         print("Usuario encontrado:", user)
 
+        usuario_rol = UsuarioRol.objects.filter(usuario_id=user.cedula).values_list('rol_id', flat=True).first()
         # 🔹 Buscar el dispositivo MFA activo del usuario
         mfa_device = get_object_or_404(MFADevice, user=user, is_active=True)
 
@@ -190,7 +191,8 @@ class VerificarMFAView(APIView):
 
         return Response({
             "refresh": str(refresh),
-            "access": access_token
+            "access": access_token,
+            "usuario_rol": str(usuario_rol)
         }, status=status.HTTP_200_OK)
 
 
@@ -210,7 +212,8 @@ class CuentaDesbloqueo(APIView):
         cedula = request.data.get("user_id")
         print(cedula)
         direccion_smart_contract= Escritura.objects.filter(numero_escritura=escritura_id).first().direccion_smart_contract
-         
+        if "@" in cedula:
+            cedula = Usuario.objects.filter(email=cedula).first().cedula 
         if not cedula or not password:
             return Response({"error": "Cédula y contraseña requeridas"}, status=status.HTTP_400_BAD_REQUEST)
 

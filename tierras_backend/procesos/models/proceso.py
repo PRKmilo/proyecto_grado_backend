@@ -12,6 +12,10 @@ class Proceso(models.Model):
     limite_tiempo = models.IntegerField(blank=True, null=True)
     fecha_limite = models.DateField(blank=True, null=True)
 
+    def __str__(self):
+         return f"Proceso {self.proceso_id} - {self.seriado_proceso or 'Sin código'}"
+
+
     class Meta:
-        managed = False
+        managed = True
         db_table = 'proceso'

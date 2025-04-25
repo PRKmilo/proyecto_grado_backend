@@ -11,7 +11,7 @@ class FirebaseService:
     def __init__(self):
         # Ruta al archivo JSON de credenciales (en la misma carpeta)
         print("-------- inside of firebase_service  1")
-        cred_path = os.path.join(os.path.dirname(__file__), 'proyectoprueba-46431-firebase-adminsdk-fbsvc-12f01dc8c4.json')
+        cred_path = os.path.join(os.path.dirname(__file__), 'proyectoprueba-46431-firebase-adminsdk-fbsvc-4175e4c6ec.json')
         print("-------- inside of firebase_service  2")
 
         if not firebase_admin._apps:

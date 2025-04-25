@@ -2,6 +2,7 @@ import random
 from usuarios.models.usuario_rol import UsuarioRol
 from notificaciones.models import Notificacion
 from notificaciones.notify_user import notify_user
+import re
 
 class NotificacionesService:
 
@@ -25,8 +26,8 @@ class NotificacionesService:
         for destino in destinatarios:
             notif = Notificacion.objects.create(
                 id_escritura_id=escritura_id,
-                user_receiver=destino,
-                user_sender=user_id,
+                user_receiver=NotificacionesService.sanitize_group_name(destino),
+                user_sender=NotificacionesService.sanitize_group_name(user_id),
                 mensaje=f"Se le ha asignado una nueva tarea en la escritura #{escritura_id}"
             )
             notify_user(notif)
@@ -36,7 +37,7 @@ class NotificacionesService:
         notif_ben = Notificacion.objects.create(
             id_escritura_id=escritura_id,
             user_receiver=beneficiario_id,
-            user_sender=user_id,
+            user_sender=NotificacionesService.sanitize_group_name(user_id),
             mensaje=f"Su proceso de escritura #{escritura_id} está en curso"
         )
         notify_user(notif_ben)
@@ -74,3 +75,8 @@ class NotificacionesService:
             return random.sample(user_ids, count)
 
         raise ValueError(f"Necesitas {count} usuarios para rol_id={role_id}, pero solo hay {len(user_ids)}")
+
+    @staticmethod
+    def sanitize_group_name(name):
+        # Reemplaza cualquier carácter que no sea alfanumérico, guion, guion bajo o punto
+        return re.sub(r'[^a-zA-Z0-9\-_.]', '_', name)
