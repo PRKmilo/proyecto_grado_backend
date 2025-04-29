@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Escritura
 from .serializers import EscrituraSerializer
-from .cloudinaryService.cloudinary_service  import CloudinaryService
 from firebase.firebaseService import FirebaseService
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import RolesVerificadores

@@ -13,7 +13,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             print(f"Unido al grupo: {self.group_name}")
             await self.accept()
         except Exception as e:
-            print(f"Error en connect():" {e})
+            print(f"Error en connect():#{e}")
             raise 
 
     async def disconnect(self, close_code):

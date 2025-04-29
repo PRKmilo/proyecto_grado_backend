@@ -2,10 +2,11 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from notificaciones.models import Notificacion
 from notificaciones.serializers import NotificacionSerializer  # o dict manual
-
+import re
 def notify_user(notif_instance):
     channel_layer = get_channel_layer()
-    group_name = f'notifications_{notif_instance.user_receiver}'
+    name_group=re.sub(r'[^a-zA-Z0-9\-_.]', '_', notif_instance.user_receiver)
+    group_name = f'notifications_{name_group}'
     
     # Si tienes un serializer:
     from notificaciones.serializers import NotificacionSerializer
